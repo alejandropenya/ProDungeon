@@ -10,15 +10,19 @@ namespace Utils
         private IEnumerator _generatorCoroutine;
         private bool _generationEnded;
         private bool _doNextStep;
+        private bool _endGeneration;
 
         [SerializeField] private Button nextStepButton;
         [SerializeField] private Button startButton;
         [SerializeField] private TMP_InputField roomNumberInputField;
-        
+        [SerializeField] private DungeonGenerator dungeonGenerator;
+
         private void Start()
         {
-            StartGeneration();
+            startButton.onClick.AddListener(StartGeneration);
             nextStepButton.onClick.AddListener(() => { _doNextStep = true; });
+            //Set button inactive
+            nextStepButton.interactable = false;
         }
 
         private void StartGeneration()
@@ -26,23 +30,34 @@ namespace Utils
             if (_generatorCoroutine != null) StopCoroutine(_generatorCoroutine);
             _generatorCoroutine = TestCoroutine();
             StartCoroutine(_generatorCoroutine);
+            nextStepButton.interactable = true;
         }
-        
+
+        private void StopGeneration()
+        {
+            _generatorCoroutine = null;
+            nextStepButton.interactable = false;
+        }
+
         private IEnumerator TestCoroutine()
         {
             // Initialize data
             _generationEnded = false;
             var roomNumber = roomNumberInputField.text.ToInt();
-            if (roomNumber == 0) roomNumber = 5;
-            var generator = Resources.FindObjectsOfTypeAll<DungeonGenerator>().FirstOrDefault();
-           generator.numberOfRooms = roomNumber;
-            
+            if (roomNumber == 0)
+            {
+                roomNumberInputField.text = "5";
+                roomNumber = 5;
+            }
+
+            dungeonGenerator.numberOfRooms = roomNumber;
+
             while (!_generationEnded)
             {
-                if (_doNextStep)
+                if (_doNextStep || _endGeneration)
                 {
                     _doNextStep = false;
-                    generator.GenerateFloor();
+                    dungeonGenerator.GenerateFloor();
                 }
 
                 yield return null;
