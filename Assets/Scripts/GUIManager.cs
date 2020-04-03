@@ -53,25 +53,28 @@ namespace Utils
             {
                 roomNumberInputField.text = "5";
                 roomNumber = 5;
-                dungeonGenerator.numberOfRooms = roomNumber;
+                dungeonGenerator.maxNumberOfRooms = roomNumber;
             }
 
-            dungeonGenerator.numberOfRooms = roomNumber;
+            dungeonGenerator.maxNumberOfRooms = roomNumber;
 
             while (!_generationEnded)
             {
                 if (_doNextStep || _endGeneration)
                 {
                     _doNextStep = false;
-                    if (!dungeonGenerator.NextStep())
+                    dungeonGenerator.NextStep();
+                    if (dungeonGenerator.HasGenerationEnded())
                     {
                         nextStepButton.interactable = false;
                         endGenerationButton.interactable = false;
                         _generationEnded = true;
                         _endGeneration = false;
+                        dungeonGenerator.PaintTest();
                         StopGeneration();
                         yield break;
                     }
+                    if(!_endGeneration) dungeonGenerator.PaintTest();
                 }
                 yield return null;
             }

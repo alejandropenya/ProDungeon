@@ -1,139 +1,183 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
+using Utils;
 
-namespace Utils
+public class DungeonGenerator : MonoBehaviour
 {
-    public class DungeonGenerator : MonoBehaviour
+    [SerializeField] public int maxNumberOfRooms;
+    [SerializeField] private List<GameObject> currentObjects;
+    private List<Room> alreadyCheckedRooms;
+
+    private List<Room> _currentRooms;
+    private Matrix<(DungeonTileType, Room)> _floorMatrix;
+
+    public void InitializeFloor()
     {
-        [SerializeField] public int numberOfRooms;
-        [SerializeField] private List<GameObject> currentObjects;
+        currentObjects?.ForEach(DestroyImmediate);
+        currentObjects = new List<GameObject>();
+        _currentRooms = new List<Room>();
+        alreadyCheckedRooms = new List<Room>();
+        
+        _floorMatrix = new Matrix<(DungeonTileType, Room)>(200, 200);
+        _floorMatrix.FillMatrix((col, row) => (DungeonTileType.Empty, null));
+        
+    }
 
-        private List<Room> currentRooms;
-        private Matrix<(DungeonTileType, Room)> floorMatrix;
+    private void AddRoom(Room newRoom, Vector2Int newPosition, Door dungeonDoor)
+    {
+        _floorMatrix.SetSubMatrix(newRoom.roomMatrix.Convert(type => (type, room: newRoom)),
+            newPosition.x, newPosition.y);
+        newRoom.northDoor.globalPosition = newRoom.northDoor.localPosition + newPosition;
+        newRoom.southDoor.globalPosition = newRoom.southDoor.localPosition + newPosition;
+        newRoom.westDoor.globalPosition = newRoom.westDoor.localPosition + newPosition;
+        newRoom.eastDoor.globalPosition = newRoom.eastDoor.localPosition + newPosition;
+        _currentRooms.Add(newRoom);
 
-        [ContextMenu("test")]
-        public void GenerateFloor()
+        if (dungeonDoor == null) return;
+
+        dungeonDoor.neighbourRoom = newRoom;
+        switch (dungeonDoor.orientation)
         {
-            InitializeFloor();
+            case CardinalPoints.North:
+                newRoom.southDoor.neighbourRoom = dungeonDoor.parentRoom;
+                break;
+            case CardinalPoints.East:
+                newRoom.westDoor.neighbourRoom = dungeonDoor.parentRoom;
+                break;
+            case CardinalPoints.West:
+                newRoom.eastDoor.neighbourRoom = dungeonDoor.parentRoom;
+                break;
+            case CardinalPoints.South:
+                newRoom.northDoor.neighbourRoom = dungeonDoor.parentRoom;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
 
-            for (var i = 0; i < numberOfRooms; i++)
+    public bool HasGenerationEnded()
+    {
+        return maxNumberOfRooms <= _currentRooms.Count;
+    }
+
+    private Room GetRandomRoom()
+    {
+        var room = RoomPool.roomList.Where(room1 => !alreadyCheckedRooms.Contains(room1)).GetRandom();
+        if (room == null) return null;
+        alreadyCheckedRooms.Add(room);
+        room = room.Clone();
+        return room;
+    }
+
+    public void NextStep()
+    {
+        var newPosition = new Vector2Int(-1, -1);
+        Door door = null;
+        Room room = null;
+        while (newPosition == new Vector2Int(-1, -1))
+        {
+            room = GetRandomRoom();
+            if (room == null)
             {
-                var room = GetRandomRoom();
-                var newPosition = GetAvailablePosition(room);
-                AddRoom(room, newPosition);
+                maxNumberOfRooms = _currentRooms.Count;
+                return;
             }
+            var availablePosition = GetAvailablePosition(room);
+            newPosition = availablePosition.Item1;
+            door = availablePosition.Item2;
+        }
+        AddRoom(room, newPosition, door);
+    }
 
-            PaintTest();
+    private (Vector2Int, Door) GetAvailablePosition(Room room)
+    {
+        if (_currentRooms.Count == 0)
+            return (new Vector2Int(_floorMatrix.Cols / 2, _floorMatrix.Rows / 2), null);
+
+        var dungeonRoomDoors = GetAvailableDoors();
+
+        foreach (var dungeonDoor in dungeonRoomDoors)
+        {
+            var availablePosition = GetInitialPositionFromDoor(room, dungeonDoor);
+            if (DoesRoomFit(room, availablePosition)) return (availablePosition, dungeonDoor);
         }
 
-        public void InitializeFloor()
-        {
-            currentObjects?.ForEach(DestroyImmediate);
-            currentObjects = new List<GameObject>();
-            currentRooms = new List<Room>();
+        return (new Vector2Int(-1, -1), null);
+    }
 
-            floorMatrix = new Matrix<(DungeonTileType, Room)>(200, 200);
-            floorMatrix.FillMatrix((col, row) => (DungeonTileType.Empty, null));
+    private List<Door> GetAvailableDoors()
+    {
+        return _currentRooms.Where(x => x.GetAvailableDoors().Any()).SelectMany((room => room.GetAvailableDoors()))
+            .ToList();
+    }
+
+    private static Vector2Int GetInitialPositionFromDoor(Room newRoom, Door dungeonRoomDoor)
+    {
+        var result = new Vector2Int(dungeonRoomDoor.globalPosition.x, dungeonRoomDoor.globalPosition.y);
+        Door currentRoomDoor;
+
+        switch (dungeonRoomDoor.orientation)
+        {
+            case CardinalPoints.North:
+                currentRoomDoor = newRoom.southDoor;
+                result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y + 1);
+                break;
+            case CardinalPoints.East:
+                currentRoomDoor = newRoom.westDoor;
+                result += new Vector2Int(-currentRoomDoor.localPosition.x + 1, -currentRoomDoor.localPosition.y);
+                break;
+            case CardinalPoints.West:
+                currentRoomDoor = newRoom.eastDoor;
+                result += new Vector2Int(-currentRoomDoor.localPosition.x - 1, -currentRoomDoor.localPosition.y);
+                break;
+            case CardinalPoints.South:
+                currentRoomDoor = newRoom.northDoor;
+                result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y - 1);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
 
-        private bool AddRoom(Room room, Vector2Int newPosition)
-        {
-            floorMatrix.SetSubMatrix(room.roomMatrix.Convert(type => (type, room)),
-                newPosition.x, newPosition.y);
-            room.northDoor.globalPosition = room.northDoor.localPosition + newPosition;
-            room.southDoor.globalPosition = room.southDoor.localPosition + newPosition;
-            room.westDoor.globalPosition = room.westDoor.localPosition + newPosition;
-            room.eastDoor.globalPosition = room.eastDoor.localPosition + newPosition;
-            currentRooms.Add(room);
+        return result;
+    }
 
-            return numberOfRooms > currentRooms.Count;
-        }
-
-        private Room GetRandomRoom()
+    private bool DoesRoomFit(Room room, Vector2Int initialPosition)
+    {
+        try
         {
-            var room = RoomPool.roomList.GetRandom();
-            room = room.Clone();
-            return room;
-        }
-
-        public bool NextStep()
-        {
-            var room = GetRandomRoom();
-            var result = AddRoom(room, GetAvailablePosition(room));
-            PaintTest();
+            var spaceToCheck = _floorMatrix.GetSubMatrix(initialPosition.x,
+                initialPosition.y, room.cols, room.rows);
+            var result = spaceToCheck.All((item, col, row) => item.Item2 == null);
             return result;
         }
-
-        private Vector2Int GetAvailablePosition(Room room)
+        catch (Exception e)
         {
-            if (currentRooms.Count == 0)
-                return new Vector2Int(floorMatrix.Cols / 2, floorMatrix.Rows / 2);
-            var dungeonRoom = currentRooms.Where(x => x.GetAvailableDoors().Any()).GetRandom();
-            var dungeonRoomDoor = dungeonRoom.GetAvailableDoors().GetRandom();
-            Door currentRoomDoor;
+            return false;
+        }
+    }
 
-            var result = new Vector2Int(dungeonRoomDoor.globalPosition.x, dungeonRoomDoor.globalPosition.y);
-
-
-            switch (dungeonRoomDoor.orientation)
+    public void PaintTest()
+    {
+        this._floorMatrix.ForEach((col, row, item) =>
+        {
+            var (dungeonTileType, _) = item;
+            if (dungeonTileType == DungeonTileType.Empty || dungeonTileType == DungeonTileType.Hole)
             {
-                case CardinalPoints.North:
-                    currentRoomDoor = room.southDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y + 1);
-                    room.southDoor.neighbourRoom = dungeonRoom;
-                    break;
-                case CardinalPoints.East:
-                    currentRoomDoor = room.westDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x + 1, -currentRoomDoor.localPosition.y);
-                    room.westDoor.neighbourRoom = dungeonRoom;
-                    break;
-                case CardinalPoints.West:
-                    currentRoomDoor = room.eastDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x - 1, -currentRoomDoor.localPosition.y);
-                    room.eastDoor.neighbourRoom = dungeonRoom;
-                    break;
-                case CardinalPoints.South:
-                    currentRoomDoor = room.northDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y - 1);
-                    room.northDoor.neighbourRoom = dungeonRoom;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
+                return;
             }
 
-            dungeonRoomDoor.neighbourRoom = room;
+            var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
-            Debug.Log(dungeonRoomDoor.orientation.ToString() + ", " + dungeonRoomDoor.globalPosition.x + ", " +
-                      dungeonRoomDoor.globalPosition.y);
-
-            return result;
-        }
-
-        private void PaintTest()
-        {
-            this.floorMatrix.ForEach((col, row, item) =>
+            if (dungeonTileType == DungeonTileType.Door)
             {
-                if (item.Item1 == DungeonTileType.Empty || item.Item1 == DungeonTileType.Hole)
-                {
-                    return;
-                }
+                cube.GetComponent<MeshRenderer>().material.color = Color.green;
+            }
 
-                var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-                if (item.Item1 == DungeonTileType.Door)
-                {
-                    cube.GetComponent<MeshRenderer>().material.color = Color.green;
-                }
-
-                ;
-
-                currentObjects.Add(cube);
-                cube.transform.SetParent(transform);
-                cube.transform.position = new Vector3(col, 0, row);
-                cube.transform.localScale = new Vector3(0.95f, 0.95f, 0.95f);
-            });
-        }
+            currentObjects.Add(cube);
+            cube.transform.SetParent(transform);
+            cube.transform.position = new Vector3(col, 0, row);
+            cube.transform.localScale = new Vector3(0.95f, 0.95f, 0.95f);
+        });
     }
 }
