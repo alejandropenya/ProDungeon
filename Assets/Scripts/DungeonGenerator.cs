@@ -16,45 +16,60 @@ namespace Utils
         [ContextMenu("test")]
         public void GenerateFloor()
         {
+            InitializeFloor();
+
+            for (var i = 0; i < numberOfRooms; i++)
+            {
+                var room = GetRandomRoom();
+                var newPosition = GetAvailablePosition(room);
+                AddRoom(room, newPosition);
+            }
+
+            PaintTest();
+        }
+
+        public void InitializeFloor()
+        {
             currentObjects?.ForEach(DestroyImmediate);
             currentObjects = new List<GameObject>();
             currentRooms = new List<Room>();
 
             floorMatrix = new Matrix<(DungeonTileType, Room)>(200, 200);
             floorMatrix.FillMatrix((col, row) => (DungeonTileType.Empty, null));
+        }
 
-            var initialPosition = new Vector2Int(floorMatrix.Cols / 2,
-                floorMatrix.Rows / 2);
-           
+        private bool AddRoom(Room room, Vector2Int newPosition)
+        {
+            floorMatrix.SetSubMatrix(room.roomMatrix.Convert(type => (type, room)),
+                newPosition.x, newPosition.y);
+            room.northDoor.globalPosition = room.northDoor.localPosition + newPosition;
+            room.southDoor.globalPosition = room.southDoor.localPosition + newPosition;
+            room.westDoor.globalPosition = room.westDoor.localPosition + newPosition;
+            room.eastDoor.globalPosition = room.eastDoor.localPosition + newPosition;
+            currentRooms.Add(room);
+
+            return numberOfRooms > currentRooms.Count;
+        }
+
+        private Room GetRandomRoom()
+        {
             var room = RoomPool.roomList.GetRandom();
             room = room.Clone();
-            currentRooms.Add(room);
-            floorMatrix.SetSubMatrix(room.roomMatrix.Convert(type => (type, room)), initialPosition.x,
-                initialPosition.y);
-            room.northDoor.globalPosition = room.northDoor.localPosition + initialPosition;
-            room.southDoor.globalPosition = room.southDoor.localPosition + initialPosition;
-            room.westDoor.globalPosition = room.westDoor.localPosition + initialPosition;
-            room.eastDoor.globalPosition = room.eastDoor.localPosition + initialPosition;
+            return room;
+        }
 
-            for (var i = 1; i < numberOfRooms; i++)
-            {
-                room = RoomPool.roomList.GetRandom();
-                room = room.Clone();
-                var newPosition = GetAvailablePosition(room);
-                floorMatrix.SetSubMatrix(room.roomMatrix.Convert(type => (type, room)),
-                    newPosition.x, newPosition.y);
-                room.northDoor.globalPosition = room.northDoor.localPosition + newPosition;
-                room.southDoor.globalPosition = room.southDoor.localPosition + newPosition;
-                room.westDoor.globalPosition = room.westDoor.localPosition + newPosition;
-                room.eastDoor.globalPosition = room.eastDoor.localPosition + newPosition;
-                currentRooms.Add(room);
-            }
-
+        public bool NextStep()
+        {
+            var room = GetRandomRoom();
+            var result = AddRoom(room, GetAvailablePosition(room));
             PaintTest();
+            return result;
         }
 
         private Vector2Int GetAvailablePosition(Room room)
         {
+            if (currentRooms.Count == 0)
+                return new Vector2Int(floorMatrix.Cols / 2, floorMatrix.Rows / 2);
             var dungeonRoom = currentRooms.Where(x => x.GetAvailableDoors().Any()).GetRandom();
             var dungeonRoomDoor = dungeonRoom.GetAvailableDoors().GetRandom();
             Door currentRoomDoor;

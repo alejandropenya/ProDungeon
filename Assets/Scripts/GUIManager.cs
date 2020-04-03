@@ -14,6 +14,7 @@ namespace Utils
 
         [SerializeField] private Button nextStepButton;
         [SerializeField] private Button startButton;
+        [SerializeField] private Button endGenerationButton;
         [SerializeField] private TMP_InputField roomNumberInputField;
         [SerializeField] private DungeonGenerator dungeonGenerator;
 
@@ -21,8 +22,9 @@ namespace Utils
         {
             startButton.onClick.AddListener(StartGeneration);
             nextStepButton.onClick.AddListener(() => { _doNextStep = true; });
-            //Set button inactive
+            endGenerationButton.onClick.AddListener(() => { _endGeneration = true; });
             nextStepButton.interactable = false;
+            endGenerationButton.interactable = false;
         }
 
         private void StartGeneration()
@@ -31,12 +33,15 @@ namespace Utils
             _generatorCoroutine = TestCoroutine();
             StartCoroutine(_generatorCoroutine);
             nextStepButton.interactable = true;
+            endGenerationButton.interactable = true;
+            dungeonGenerator.InitializeFloor();
         }
 
         private void StopGeneration()
         {
             _generatorCoroutine = null;
             nextStepButton.interactable = false;
+            endGenerationButton.interactable = false;
         }
 
         private IEnumerator TestCoroutine()
@@ -48,6 +53,7 @@ namespace Utils
             {
                 roomNumberInputField.text = "5";
                 roomNumber = 5;
+                dungeonGenerator.numberOfRooms = roomNumber;
             }
 
             dungeonGenerator.numberOfRooms = roomNumber;
@@ -57,12 +63,18 @@ namespace Utils
                 if (_doNextStep || _endGeneration)
                 {
                     _doNextStep = false;
-                    dungeonGenerator.GenerateFloor();
+                    if (!dungeonGenerator.NextStep())
+                    {
+                        nextStepButton.interactable = false;
+                        endGenerationButton.interactable = false;
+                        _generationEnded = true;
+                        _endGeneration = false;
+                        StopGeneration();
+                        yield break;
+                    }
                 }
-
                 yield return null;
             }
-
             yield break;
         }
     }
