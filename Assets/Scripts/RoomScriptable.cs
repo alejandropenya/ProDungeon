@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.WSA;
 
 namespace Utils
 {
+    [CreateAssetMenu(fileName = "Room", menuName = "ScriptableObjects/Room", order = 1)]
     public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
     {
         public int cols;
         public int rows;
-        public Matrix<DungeonTileType> roomMatrix;
-        public List<DungeonTileType> roomList;
+        public Matrix<TileTypeScriptable> roomMatrix;
+        public List<TileTypeScriptable> roomList;
 
         public void OnBeforeSerialize()
         {
@@ -22,7 +24,7 @@ namespace Utils
 
         public void OnAfterDeserialize()
         {
-            roomMatrix = new Matrix<DungeonTileType>(cols, rows);
+            roomMatrix = new Matrix<TileTypeScriptable>(cols, rows);
             if(roomList == null) return;
             roomMatrix.FillMatrix((col, row) => roomList.GetOrDefault(row * cols + col));
         }

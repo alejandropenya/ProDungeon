@@ -5,7 +5,7 @@ using UnityEngine;
 using Utils;
 
 [Serializable]
-public class Room
+public class Room : ISerializationCallbackReceiver
 {
     public int cols;
     public int rows;
@@ -15,7 +15,7 @@ public class Room
     public Door eastDoor;
     public Door westDoor;
 
-    public Matrix<DungeonTileType> roomMatrix;
+    public Matrix<TileTypeScriptable> roomMatrix;
 
     public Room()
     {
@@ -25,8 +25,9 @@ public class Room
     {
         this.cols = cols;
         this.rows = rows;
-        roomMatrix = new Matrix<DungeonTileType>(this.cols, this.rows);
-        roomMatrix.FillMatrix((col, row) => DungeonTileType.Ground);
+        roomMatrix = new Matrix<TileTypeScriptable>(this.cols, this.rows);
+        roomMatrix.FillMatrix((col, row) =>
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Ground", "TileTypeScriptable"));
         northDoor = new Door
         {
             localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), rows - 1),
@@ -34,7 +35,8 @@ public class Room
             parentRoom = this,
             neighbourRoom = null
         };
-        roomMatrix.SetValue(DungeonTileType.Door, (int) northDoor.localPosition.x, (int) northDoor.localPosition.y);
+        roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) northDoor.localPosition.x, (int) northDoor.localPosition.y);
         southDoor = new Door
         {
             localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), 0),
@@ -42,7 +44,8 @@ public class Room
             parentRoom = this,
             neighbourRoom = null
         };
-        roomMatrix.SetValue(DungeonTileType.Door, (int) southDoor.localPosition.x, (int) southDoor.localPosition.y);
+        roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) southDoor.localPosition.x, (int) southDoor.localPosition.y);
         eastDoor = new Door
         {
             localPosition = new Vector2Int(cols - 1, this.GetRandomInt(1, rows - 2)),
@@ -50,7 +53,8 @@ public class Room
             parentRoom = this,
             neighbourRoom = null
         };
-        roomMatrix.SetValue(DungeonTileType.Door, (int) eastDoor.localPosition.x, (int) eastDoor.localPosition.y);
+        roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) eastDoor.localPosition.x, (int) eastDoor.localPosition.y);
         westDoor = new Door
         {
             localPosition = new Vector2Int(0, this.GetRandomInt(1, rows - 2)),
@@ -58,7 +62,8 @@ public class Room
             parentRoom = this,
             neighbourRoom = null
         };
-        roomMatrix.SetValue(DungeonTileType.Door, (int) westDoor.localPosition.x, (int) westDoor.localPosition.y);
+        roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) westDoor.localPosition.x, (int) westDoor.localPosition.y);
     }
 
     public List<Door> GetAvailableDoors()
@@ -74,15 +79,18 @@ public class Room
     public static Room CreateRandomRoom()
     {
         var result = new Room {cols = 3, rows = 3};
-        result.roomMatrix = new Matrix<DungeonTileType>(result.cols, result.rows);
-        result.roomMatrix.FillMatrix((col, row) => DungeonTileType.Ground);
+        result.roomMatrix = new Matrix<TileTypeScriptable>(result.cols, result.rows);
+        result.roomMatrix.FillMatrix((col, row) =>
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Ground", "TileTypeScriptable"));
         result.northDoor = new Door
         {
             localPosition = new Vector2Int(result.GetRandomInt(0, result.cols - 1), 0),
             orientation = CardinalPoints.North,
             parentRoom = result
         };
-        result.roomMatrix.SetValue(DungeonTileType.Door, (int) result.northDoor.localPosition.x,
+        result.roomMatrix.SetValue(
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) result.northDoor.localPosition.x,
             (int) result.northDoor.localPosition.y);
         result.southDoor = new Door
         {
@@ -90,7 +98,9 @@ public class Room
             orientation = CardinalPoints.South,
             parentRoom = result
         };
-        result.roomMatrix.SetValue(DungeonTileType.Door, (int) result.southDoor.localPosition.x,
+        result.roomMatrix.SetValue(
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) result.southDoor.localPosition.x,
             (int) result.southDoor.localPosition.y);
         result.eastDoor = new Door
         {
@@ -98,7 +108,9 @@ public class Room
             orientation = CardinalPoints.East,
             parentRoom = result
         };
-        result.roomMatrix.SetValue(DungeonTileType.Door, (int) result.eastDoor.localPosition.x,
+        result.roomMatrix.SetValue(
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) result.eastDoor.localPosition.x,
             (int) result.eastDoor.localPosition.y);
         result.westDoor = new Door
         {
@@ -106,9 +118,26 @@ public class Room
             orientation = CardinalPoints.West,
             parentRoom = result
         };
-        result.roomMatrix.SetValue(DungeonTileType.Door, (int) result.westDoor.localPosition.x,
+        result.roomMatrix.SetValue(
+            AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
+            (int) result.westDoor.localPosition.x,
             (int) result.westDoor.localPosition.y);
 
         return result;
+    }
+
+    public void OnBeforeSerialize()
+    {
+        this.ListOf(eastDoor, southDoor, westDoor, northDoor)
+            .Where(door => door != null)
+            .ForEach(door => door.parentRoom = null);
+        
+    }
+
+    public void OnAfterDeserialize()
+    {
+        this.ListOf(eastDoor, southDoor, westDoor, northDoor)
+            .Where(door => door != null)
+            .ForEach(door => door.parentRoom = this);
     }
 }
