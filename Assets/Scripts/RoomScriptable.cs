@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using DungeonGenerator;
 using Extensions;
+using UnityEditor;
 using UnityEngine;
 using Utils;
 
@@ -57,33 +58,58 @@ public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
         var northDoorIndex = roomMatrix.GetRow(0).IndexOf(doorTileType);
         if (northDoorIndex != -1)
         {
-            northDoor = ScriptableObject.CreateInstance<Door>();
+            if (!northDoor)
+            {
+                northDoor = CreateInstance<Door>();
+                northDoor.name = "North Door";
+            }
             northDoor.orientation = CardinalPoints.North;
             northDoor.localPosition = new Vector2Int(northDoorIndex, 0);
+            AssetDatabaseUtils.SetDirty(northDoor);
         }
 
         var westDoorIndex = roomMatrix.GetColumn(0).IndexOf(doorTileType);
         if (westDoorIndex != -1)
         {
-            westDoor = ScriptableObject.CreateInstance<Door>();
+            if (!westDoor)
+            {
+                westDoor = CreateInstance<Door>();
+                westDoor.name = "West Door";
+            }
             westDoor.orientation = CardinalPoints.West;
             westDoor.localPosition = new Vector2Int(0, westDoorIndex);
+            AssetDatabaseUtils.SetDirty(westDoor);
         }
 
         var eastDoorIndex = roomMatrix.GetColumn(cols - 1).IndexOf(doorTileType);
         if (eastDoorIndex != -1)
         {
-            eastDoor = ScriptableObject.CreateInstance<Door>();
+            if (!eastDoor)
+            {
+                eastDoor = CreateInstance<Door>();
+                eastDoor.name = "East Door";
+            }
             eastDoor.orientation = CardinalPoints.East;
             eastDoor.localPosition = new Vector2Int(cols - 1, eastDoorIndex);
+            AssetDatabaseUtils.SetDirty(eastDoor);
         }
 
         var southDoorIndex = roomMatrix.GetRow(rows - 1).IndexOf(doorTileType);
         if (southDoorIndex != -1)
         {
-            southDoor = ScriptableObject.CreateInstance<Door>();
+            if (!southDoor)
+            {
+                southDoor = CreateInstance<Door>();
+                southDoor.name = "South Door";
+            }
             southDoor.orientation = CardinalPoints.South;
             southDoor.localPosition = new Vector2Int(southDoorIndex, rows - 1);
+            AssetDatabaseUtils.SetDirty(southDoor);
         }
+
+        var doors = this.ListOf(northDoor, eastDoor, southDoor, westDoor).Select(x => x as Object);
+        AssetDatabaseUtils.SaveAsset<RoomScriptable>(this, AssetDatabase.GetAssetPath(this), doors.ToList());
+        AssetDatabaseUtils.SetDirty(this);
+        AssetDatabaseUtils.SaveAssets();
     }
 }

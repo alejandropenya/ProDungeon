@@ -130,5 +130,42 @@ namespace Utils
                 .Where(x => x);
             return allChilds.CloneList();
         }
+
+        public static void SaveAsset<T>(UnityEngine.Object obj, string path,
+            List<UnityEngine.Object> internalObjs = null)
+            where T : UnityEngine.Object
+        {
+            if (!AssetDatabase.Contains(obj))
+            {
+                AssetDatabaseUtils.CreateAsset(obj, path);
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+                obj = AssetDatabase.LoadAssetAtPath<T>(path);
+            }
+            AssetDatabase.SetMainObject(obj, path);
+
+            UnityEngine.Object[] existingInternalObjects =
+                AssetDatabase.LoadAllAssetsAtPath(path).Remove(obj).ToArray();
+            if (internalObjs != null && internalObjs.Count > 0)
+            {
+                for (int j = 0; j < internalObjs.Count; j++)
+                {
+                    if (existingInternalObjects.Contains(internalObjs[j]))
+                    {
+                        existingInternalObjects = existingInternalObjects.Remove(internalObjs[j]).ToArray();
+                    }
+                    else
+                    {
+                        AssetDatabase.AddObjectToAsset(internalObjs[j], obj);
+                    }
+                }
+            }
+
+            for (int j = 0; j < existingInternalObjects.Length; j++)
+            {
+                AssetDatabase.RemoveObjectFromAsset(existingInternalObjects[j]);
+            }
+
+            AssetDatabase.ImportAsset(path);
+        }
     }
 }

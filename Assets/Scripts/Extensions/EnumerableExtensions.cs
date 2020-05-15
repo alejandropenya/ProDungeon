@@ -428,5 +428,11 @@ namespace Extensions
             });
             return result;
         }
+        
+        public static IEnumerable<T> Remove<T>(this IEnumerable<T> list, T removeItem)
+        {
+            return list.Where(x => !x.Equals(removeItem));
+        }
+        
     }
 }
