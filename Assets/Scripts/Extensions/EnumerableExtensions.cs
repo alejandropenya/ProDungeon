@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using Utils;
 
-namespace Utils
+namespace Extensions
 {
     public static class EnumerableExtensions
     {

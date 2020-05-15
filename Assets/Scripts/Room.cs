@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using DungeonGenerator;
+using Extensions;
 using UnityEngine;
 using Utils;
 
-[Serializable]
-public class Room : ISerializationCallbackReceiver
+public class Room : ScriptableObject, ISerializationCallbackReceiver
 {
     public int cols;
     public int rows;
@@ -28,42 +27,38 @@ public class Room : ISerializationCallbackReceiver
         roomMatrix = new Matrix<TileTypeScriptable>(this.cols, this.rows);
         roomMatrix.FillMatrix((col, row) =>
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Ground", "TileTypeScriptable"));
-        northDoor = new Door
-        {
-            localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), rows - 1),
-            orientation = CardinalPoints.North,
-            parentRoom = this,
-            neighbourRoom = null
-        };
+
+        northDoor = ScriptableObject.CreateInstance<Door>();
+        northDoor.localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), rows - 1);
+        northDoor.orientation = CardinalPoints.North;
+        northDoor.parentRoom = this;
+        northDoor.neighbourRoom = null;
         roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) northDoor.localPosition.x, (int) northDoor.localPosition.y);
-        southDoor = new Door
-        {
-            localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), 0),
-            orientation = CardinalPoints.South,
-            parentRoom = this,
-            neighbourRoom = null
-        };
+            northDoor.localPosition.x, northDoor.localPosition.y);
+
+        southDoor = ScriptableObject.CreateInstance<Door>();
+        southDoor.localPosition = new Vector2Int(this.GetRandomInt(1, cols - 2), 0);
+        southDoor.orientation = CardinalPoints.South;
+        southDoor.parentRoom = this;
+        southDoor.neighbourRoom = null;
         roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) southDoor.localPosition.x, (int) southDoor.localPosition.y);
-        eastDoor = new Door
-        {
-            localPosition = new Vector2Int(cols - 1, this.GetRandomInt(1, rows - 2)),
-            orientation = CardinalPoints.East,
-            parentRoom = this,
-            neighbourRoom = null
-        };
+            southDoor.localPosition.x, southDoor.localPosition.y);
+
+        eastDoor = ScriptableObject.CreateInstance<Door>();
+        eastDoor.localPosition = new Vector2Int(cols - 1, this.GetRandomInt(1, rows - 2));
+        eastDoor.orientation = CardinalPoints.East;
+        eastDoor.parentRoom = this;
+        eastDoor.neighbourRoom = null;
         roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) eastDoor.localPosition.x, (int) eastDoor.localPosition.y);
-        westDoor = new Door
-        {
-            localPosition = new Vector2Int(0, this.GetRandomInt(1, rows - 2)),
-            orientation = CardinalPoints.West,
-            parentRoom = this,
-            neighbourRoom = null
-        };
+            eastDoor.localPosition.x, eastDoor.localPosition.y);
+
+        westDoor = ScriptableObject.CreateInstance<Door>();
+        westDoor.localPosition = new Vector2Int(0, this.GetRandomInt(1, rows - 2));
+        westDoor.orientation = CardinalPoints.West;
+        westDoor.parentRoom = this;
+        westDoor.neighbourRoom = null;
         roomMatrix.SetValue(AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) westDoor.localPosition.x, (int) westDoor.localPosition.y);
+            westDoor.localPosition.x, westDoor.localPosition.y);
     }
 
     public List<Door> GetAvailableDoors()
@@ -73,55 +68,60 @@ public class Room : ISerializationCallbackReceiver
 
     public Room Clone()
     {
-        return new Room(this.cols, this.rows);
+        var roomResult = ScriptableObject.CreateInstance<Room>();
+        roomResult.cols = cols;
+        roomResult.rows = rows;
+        roomResult.eastDoor = eastDoor.Clone();
+        roomResult.westDoor = westDoor.Clone();
+        roomResult.northDoor = northDoor.Clone();
+        roomResult.southDoor = southDoor.Clone();
+        roomResult.roomMatrix = roomMatrix.CloneMatrix();
+        return roomResult;
     }
 
     public static Room CreateRandomRoom()
     {
-        var result = new Room {cols = 3, rows = 3};
+        var result = ScriptableObject.CreateInstance<Room>();
+        result.cols = 3;
+        result.rows = 3;
         result.roomMatrix = new Matrix<TileTypeScriptable>(result.cols, result.rows);
         result.roomMatrix.FillMatrix((col, row) =>
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Ground", "TileTypeScriptable"));
-        result.northDoor = new Door
-        {
-            localPosition = new Vector2Int(result.GetRandomInt(0, result.cols - 1), 0),
-            orientation = CardinalPoints.North,
-            parentRoom = result
-        };
+        result.northDoor = ScriptableObject.CreateInstance<Door>();
+        result.northDoor.localPosition = new Vector2Int(result.GetRandomInt(0, result.cols - 1), 0);
+        result.northDoor.orientation = CardinalPoints.North;
+        result.northDoor.parentRoom = result;
         result.roomMatrix.SetValue(
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) result.northDoor.localPosition.x,
-            (int) result.northDoor.localPosition.y);
-        result.southDoor = new Door
-        {
-            localPosition = new Vector2Int(result.GetRandomInt(0, result.cols - 1), result.rows - 1),
-            orientation = CardinalPoints.South,
-            parentRoom = result
-        };
+            result.northDoor.localPosition.x,
+            result.northDoor.localPosition.y);
+
+        result.southDoor = ScriptableObject.CreateInstance<Door>();
+        result.southDoor.localPosition = new Vector2Int(result.GetRandomInt(0, result.cols - 1), result.rows - 1);
+        result.southDoor.orientation = CardinalPoints.South;
+        result.southDoor.parentRoom = result;
         result.roomMatrix.SetValue(
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) result.southDoor.localPosition.x,
-            (int) result.southDoor.localPosition.y);
-        result.eastDoor = new Door
-        {
-            localPosition = new Vector2Int(result.cols - 1, result.GetRandomInt(0, result.rows - 1)),
-            orientation = CardinalPoints.East,
-            parentRoom = result
-        };
+            result.southDoor.localPosition.x,
+            result.southDoor.localPosition.y);
+
+        result.eastDoor = ScriptableObject.CreateInstance<Door>();
+        result.eastDoor.localPosition = new Vector2Int(result.cols - 1, result.GetRandomInt(0, result.rows - 1));
+        result.eastDoor.orientation = CardinalPoints.East;
+        result.eastDoor.parentRoom = result;
         result.roomMatrix.SetValue(
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) result.eastDoor.localPosition.x,
-            (int) result.eastDoor.localPosition.y);
-        result.westDoor = new Door
-        {
-            localPosition = new Vector2Int(0, result.GetRandomInt(0, result.rows - 1)),
-            orientation = CardinalPoints.West,
-            parentRoom = result
-        };
+            result.eastDoor.localPosition.x,
+            result.eastDoor.localPosition.y);
+
+        result.westDoor = ScriptableObject.CreateInstance<Door>();
+        result.westDoor.localPosition = new Vector2Int(0, result.GetRandomInt(0, result.rows - 1));
+        result.westDoor.orientation = CardinalPoints.West;
+        result.westDoor.parentRoom = result;
         result.roomMatrix.SetValue(
             AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable"),
-            (int) result.westDoor.localPosition.x,
-            (int) result.westDoor.localPosition.y);
+            result.westDoor.localPosition.x,
+            result.westDoor.localPosition.y);
 
         return result;
     }
@@ -131,7 +131,6 @@ public class Room : ISerializationCallbackReceiver
         this.ListOf(eastDoor, southDoor, westDoor, northDoor)
             .Where(door => door != null)
             .ForEach(door => door.parentRoom = null);
-        
     }
 
     public void OnAfterDeserialize()

@@ -2,7 +2,7 @@
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-namespace Utils.RoomEditor
+namespace RoomEditor
 {
     public class ClickListener : MonoBehaviour, IPointerClickHandler
     {
