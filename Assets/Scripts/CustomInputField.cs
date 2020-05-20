@@ -12,6 +12,11 @@ public class CustomInputField : MonoBehaviour
         inputField.text = defaultValue;
     }
 
+    public void SetValue(string value)
+    {
+        inputField.text = value;
+    }
+    
     public string GetCurrentValue()
     {
         return inputField.text;

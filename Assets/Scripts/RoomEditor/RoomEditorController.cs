@@ -89,7 +89,11 @@ namespace RoomEditor
             _roomScriptableObject = ScriptableObject.CreateInstance<RoomScriptable>();
             gridLayout.transform.GetAllChildren().ForEach(Destroy);
             cols = colsField.GetCurrentValue().ToInt();
+            cols = Mathf.Clamp(cols, 0, 20);
             rows = rowsField.GetCurrentValue().ToInt();
+            rows = Mathf.Clamp(rows, 0, 20);
+            colsField.SetValue(cols.ToString());
+            rowsField.SetValue(rows.ToString());
             var roomMatrix = new Matrix<TileTypeScriptable>(cols, rows);
             _currentRoom = ScriptableObject.CreateInstance<Room>();
             roomMatrix.FillMatrix((col, row) =>
@@ -144,7 +148,8 @@ namespace RoomEditor
                     AssetDatabase.DeleteAsset(foundPath);
                     AssetDatabaseUtils.SaveAssets();
                     _roomScriptableObject =
-                        AssetDatabaseUtils.LoadAssetWithName<RoomScriptable>(roomName.GetCurrentValue(), "RoomScriptable");
+                        AssetDatabaseUtils.LoadAssetWithName<RoomScriptable>(roomName.GetCurrentValue(),
+                            "RoomScriptable");
                 }
             }
             else
@@ -152,7 +157,7 @@ namespace RoomEditor
                 _roomScriptableObject.name = roomName.GetCurrentValue();
                 AssetDatabase.CreateAsset(_roomScriptableObject, roomTextName);
             }
-        
+
             AssetDatabase.SaveAssets();
             RefreshRoomList();
             PopulateDropdown(_roomsToAdd.Select(room => room.name).ToList());
@@ -173,9 +178,18 @@ namespace RoomEditor
 
                 var tileImageTransform = tileImage.transform;
                 tileImageTransform.SetParent(transform);
-                tileImageTransform.position = new Vector3(col * 100f, row * 100f, 0f);
-                tileImageTransform.localScale = new Vector3(0.95f, 0.95f, 0f);
+                tileImageTransform.localScale = new Vector3(1f, 1f, 0f);
             });
+            var max = Mathf.Max(cols, rows);
+            if (max > 7)
+            {
+                var size = ((1 - (max - 7) / 13f) * 40) + 30;
+                gridLayout.cellSize = new Vector2(size, size);
+            }
+            else
+            {
+                gridLayout.cellSize = new Vector2(100, 100);
+            }
         }
     }
 }
