@@ -39,7 +39,11 @@ public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
     public Room ToRoom()
     {
         OnAfterDeserialize();
+        
+        #if UNITY_EDITOR
         PopulateDoors();
+        #endif
+        
         var roomResult = ScriptableObject.CreateInstance<Room>();
         roomResult.cols = cols;
         roomResult.rows = rows;
