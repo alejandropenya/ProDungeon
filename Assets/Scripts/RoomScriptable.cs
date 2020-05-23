@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 using Utils;
 
-[CreateAssetMenu(fileName = "Room", menuName = "ScriptableObjects/Room", order = 1)]
+[CreateAssetMenu(fileName = "Room", menuName = "ProDungeon/Room", order = 2)]
 public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
 {
     public int cols;
