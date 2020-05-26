@@ -55,6 +55,7 @@ public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
         return roomResult;
     }
 
+    #if UNITY_EDITOR
     private void PopulateDoors()
     {
         var doorTileType = AssetDatabaseUtils.LoadAssetWithName<TileTypeScriptable>("Door", "TileTypeScriptable");
@@ -116,4 +117,5 @@ public class RoomScriptable : ScriptableObject, ISerializationCallbackReceiver
         AssetDatabaseUtils.SetDirty(this);
         AssetDatabaseUtils.SaveAssets();
     }
+    #endif
 }

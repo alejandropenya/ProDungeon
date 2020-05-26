@@ -19,6 +19,7 @@ namespace Utils
                     .Where(x => AssetDatabase.GetAssetPath(x).StartsWith(path)).ToList();
                 
                 ((DungeonRoomSet)target).SetFieldValue("roomSet", roomsToAdd);
+                AssetDatabaseUtils.SetDirty(target);
             }
         }
     }

@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Utils
 {
+    #if UNITY_EDITOR
     public static class AssetDatabaseUtils
     {
         public static string FindAssetWithExactName(string name, out string foundPath, string className = "")
@@ -168,4 +169,5 @@ namespace Utils
             AssetDatabase.ImportAsset(path);
         }
     }
+    #endif
 }

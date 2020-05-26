@@ -103,6 +103,38 @@ namespace Extensions
         {
             return list.GetOrDefault(0.GetRandomInt(0, list.Count() - 1));
         }
+        
+        public static T GetRandomBiased<T>(this IEnumerable<T> list, Func<T, float> biasSelection)
+        {
+            var biases = list.Select(x => new
+            {
+                bias = biasSelection(x),
+                value = x,
+            }).OrderByAscending(x => x.bias);
+
+            var biasSum = biases.Sum(x => x.bias);
+            
+            var random = 0.GetRandom(0, biasSum);
+
+            var currentCount = 0f;
+
+            T selectedItem = default;
+            
+            biases.ForEach(x =>
+            {
+                if (!selectedItem?.Equals(default(T)) ?? false)
+                {
+                    return;
+                }
+                currentCount += x.bias;
+                if (currentCount >= random)
+                {
+                    selectedItem = x.value;
+                }
+            });
+
+            return selectedItem;
+        }
 
         public static List<T> CloneList<T>(this IEnumerable<T> list)
         {

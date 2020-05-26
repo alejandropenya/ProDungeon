@@ -8,12 +8,14 @@ namespace Utils.EventSystem
         [SerializeField] private float count;
 
         public float VisibleCount => count;
+        public float weight;
 
-        public static NumericalEvent CreateInstance(string eventName)
+        public static NumericalEvent CreateInstance(string eventName, float weight)
         {
             var result = CreateInstance<NumericalEvent>();
             result.name = eventName;
             result.count = 0;
+            result.weight = weight;
             return result;
         }
 

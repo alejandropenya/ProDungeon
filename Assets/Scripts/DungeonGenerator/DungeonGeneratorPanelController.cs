@@ -18,6 +18,8 @@ namespace DungeonGenerator
         [SerializeField] private Button endGenerationButton;
         [SerializeField] private TMP_InputField roomNumberInputField;
         [SerializeField] private DungeonGeneratorController dungeonGeneratorController;
+        [SerializeField] private DungeonRoomSet roomSet;
+        [SerializeField] private int numberOfRoomsVariance;
 
         private void Start()
         {
@@ -35,7 +37,6 @@ namespace DungeonGenerator
             StartCoroutine(_generatorCoroutine);
             nextStepButton.interactable = true;
             endGenerationButton.interactable = true;
-            dungeonGeneratorController.InitializeFloor();
         }
 
         private void StopGeneration()
@@ -54,10 +55,9 @@ namespace DungeonGenerator
             {
                 roomNumberInputField.text = "5";
                 roomNumber = 5;
-                dungeonGeneratorController.maxNumberOfRooms = roomNumber;
             }
 
-            dungeonGeneratorController.maxNumberOfRooms = roomNumber;
+            dungeonGeneratorController.InitializeFloor(roomSet, 3, roomNumber, numberOfRoomsVariance);
 
             while (!_generationEnded)
             {
@@ -65,7 +65,7 @@ namespace DungeonGenerator
                 {
                     _doNextStep = false;
                     dungeonGeneratorController.NextStep();
-                    if (dungeonGeneratorController.HasGenerationEnded())
+                    if (dungeonGeneratorController.HasGenerationEnded)
                     {
                         nextStepButton.interactable = false;
                         endGenerationButton.interactable = false;

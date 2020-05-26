@@ -22605,6 +22605,7 @@ MonoBehaviour:
   endGenerationButton: {fileID: 501102196}
   roomNumberInputField: {fileID: 701084605}
   dungeonGeneratorController: {fileID: 861575452}
+  roomSet: {fileID: 11400000, guid: 7bca8dd1858480345956191d11791f67, type: 2}
 --- !u!114 &764509490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26120,6 +26121,7 @@ MonoBehaviour:
   - {fileID: 1028037766}
   - {fileID: 835167655}
   - {fileID: 334255808}
+  emptyTile: {fileID: 11400000, guid: 277b2afb29a1fd344a7a81438561ba02, type: 2}
 --- !u!4 &861575453
 Transform:
   m_ObjectHideFlags: 0
