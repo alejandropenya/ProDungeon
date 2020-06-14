@@ -22606,6 +22606,7 @@ MonoBehaviour:
   roomNumberInputField: {fileID: 701084605}
   dungeonGeneratorController: {fileID: 861575452}
   roomSet: {fileID: 11400000, guid: 7bca8dd1858480345956191d11791f67, type: 2}
+  numberOfRoomsVariance: 0
 --- !u!114 &764509490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25474,7 +25475,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8aff7fdf6a2949b38e862aa08fff8fe4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxNumberOfRooms: 0
+  minNumberOfRooms: 14
+  maxNumberOfRooms: 20
+  canRoomsBeRepeated: 1
+  hasGenerationEnded: 0
   currentObjects:
   - {fileID: 1226258587}
   - {fileID: 167814153}
@@ -26122,6 +26126,12 @@ MonoBehaviour:
   - {fileID: 835167655}
   - {fileID: 334255808}
   emptyTile: {fileID: 11400000, guid: 277b2afb29a1fd344a7a81438561ba02, type: 2}
+  roomSizeModificator: {fileID: 11400000, guid: 735aa8d64c78f7b44b970fc26457b9a6,
+    type: 2}
+  verticalShapeModificator: {fileID: 11400000, guid: 2356e14f6cb89d844ac768d91d573f35,
+    type: 2}
+  roomCountModificator: {fileID: 11400000, guid: 1f16af5b87127b445a71755bbdbccd1c,
+    type: 2}
 --- !u!4 &861575453
 Transform:
   m_ObjectHideFlags: 0

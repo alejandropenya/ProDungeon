@@ -32,11 +32,13 @@ namespace DungeonGenerator
 
         private void StartGeneration()
         {
-            if (_generatorCoroutine != null) StopCoroutine(_generatorCoroutine);
-            _generatorCoroutine = TestCoroutine();
-            StartCoroutine(_generatorCoroutine);
-            nextStepButton.interactable = true;
-            endGenerationButton.interactable = true;
+            dungeonGeneratorController.InitializeFloor(roomSet, 14, 20, 3);
+            StartCoroutine(dungeonGeneratorController.GenerateDungeon());
+            //if (_generatorCoroutine != null) StopCoroutine(_generatorCoroutine);
+            //_generatorCoroutine = TestCoroutine();
+            //StartCoroutine(_generatorCoroutine);
+            //nextStepButton.interactable = true;
+            //endGenerationButton.interactable = true;
         }
 
         private void StopGeneration()

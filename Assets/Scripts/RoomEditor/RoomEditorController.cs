@@ -11,6 +11,7 @@ namespace RoomEditor
 {
     public class RoomEditorController : MonoBehaviour
     {
+#if UNITY_EDITOR
         private Room _currentRoom;
         private List<Image> _currentObjects;
         private RoomScriptable _roomScriptableObject;
@@ -191,5 +192,6 @@ namespace RoomEditor
                 gridLayout.cellSize = new Vector2(100, 100);
             }
         }
+#endif
     }
 }

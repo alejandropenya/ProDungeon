@@ -2257,8 +2257,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedTileType: {fileID: 0}
-  cols: 6
-  rows: 6
+  cols: 0
+  rows: 0
   gridLayout: {fileID: 1695952340}
   roomName: {fileID: 1755148722}
   colsField: {fileID: 79539484324132293}

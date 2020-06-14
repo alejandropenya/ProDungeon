@@ -50,7 +50,7 @@ namespace DungeonGenerator
 
         public IEnumerator GenerateDungeon()
         {
-            var countWeight = roomSizeModificator.GetModificatorValue() / roomSizeModificator.MaxExpectedValue;
+            var countWeight = roomCountModificator.GetModificatorValue() / roomCountModificator.MaxExpectedValue;
             countWeight = Mathf.Clamp(countWeight, 0, 1) * 2 - 1;
             // -1 --> 1
             countWeight *= variance;
@@ -63,6 +63,7 @@ namespace DungeonGenerator
                 if (!NextStep()) break;
             }
             hasGenerationEnded = true;
+            PaintTest();
         }
 
         private void AddRoom(Room newRoom, Vector2Int newPosition, Door dungeonDoor)
@@ -75,7 +76,7 @@ namespace DungeonGenerator
             newRoom.eastDoor.globalPosition = newRoom.eastDoor.localPosition + newPosition;
             _currentRooms.Add(newRoom);
 
-            if (dungeonDoor == null) return;
+            if (!dungeonDoor) return;
 
             dungeonDoor.neighbourRoom = newRoom;
             switch (dungeonDoor.orientation)
@@ -136,7 +137,7 @@ namespace DungeonGenerator
             while (newPosition == new Vector2Int(-1, -1))
             {
                 room = GetRandomRoom();
-                if (room == null)
+                if (!room)
                 {
                     hasGenerationEnded = true;
                     return false;
@@ -170,19 +171,17 @@ namespace DungeonGenerator
                     if (projection.orientation == CardinalPoints.North ||
                         projection.orientation == CardinalPoints.South)
                     {
-                        // This is wrong as fuck
-                        return verticalWeight > 0.5f ? 2 : 1;
+                        return  1 - (verticalWeight * 0.5f + 0.3f) + 5;
                     }
                     else
                     {
-                        // Wrong mathematics go brrrrrr
-                        return verticalWeight > 0.5f ? 1 : 2;
+                        return (verticalWeight * 0.5f + 0.3f) + 5;
                     }
                 });
                 orderedDoors.Add(selectedDoor);
                 disorderedDoors.Remove(selectedDoor);
             }
-
+            
             foreach (var dungeonDoor in orderedDoors)
             {
                 var availablePosition = GetInitialPositionFromDoor(room, dungeonDoor);
@@ -207,7 +206,7 @@ namespace DungeonGenerator
             {
                 case CardinalPoints.North:
                     currentRoomDoor = newRoom.southDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y + 1);
+                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y - 1);
                     break;
                 case CardinalPoints.East:
                     currentRoomDoor = newRoom.westDoor;
@@ -219,7 +218,7 @@ namespace DungeonGenerator
                     break;
                 case CardinalPoints.South:
                     currentRoomDoor = newRoom.northDoor;
-                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y - 1);
+                    result += new Vector2Int(-currentRoomDoor.localPosition.x, -currentRoomDoor.localPosition.y + 1);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -234,7 +233,8 @@ namespace DungeonGenerator
             {
                 var spaceToCheck = _floorMatrix.GetSubMatrix(initialPosition.x,
                     initialPosition.y, room.cols, room.rows);
-                var result = spaceToCheck.All((item, col, row) => item.Item2 == null);
+                var result = spaceToCheck.All((item, col, row) => item.Item1 == emptyTile);
+                var test = spaceToCheck.ToList().Count(x => x.Item1 != emptyTile);
                 return result;
             }
             catch (Exception)
@@ -247,6 +247,8 @@ namespace DungeonGenerator
         {
             this._floorMatrix.ForEach((col, row, item) =>
             {
+                if (item.Item1 == emptyTile) return;
+                
                 var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
 
                 cube.GetComponent<MeshRenderer>().material.color = item.Item1.color;

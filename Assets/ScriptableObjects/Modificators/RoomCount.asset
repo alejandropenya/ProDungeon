@@ -9,7 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26c0297f619744b0ae1cf0f3195a3940, type: 3}
-  m_Name: Empty
+  m_Script: {fileID: 11500000, guid: 2009edaf446b469a99a80bd8a10c5ae6, type: 3}
+  m_Name: RoomCount
   m_EditorClassIdentifier: 
-  color: {r: 1, g: 1, b: 1, a: 1}
+  registeredEvents: []
+  maxExpectedValue: 1
