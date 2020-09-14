@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-4321022531602702549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a875f64b0496ea0ac0360e31405c3, type: 3}
+  m_Name: West Door
+  m_EditorClassIdentifier: 
+  parentRoom: {fileID: 0}
+  localPosition: {x: 0, y: 1}
+  globalPosition: {x: 0, y: 0}
+  orientation: 2
+  neighbourRoom: {fileID: 0}
+--- !u!114 &-3859882486338852358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a875f64b0496ea0ac0360e31405c3, type: 3}
+  m_Name: East Door
+  m_EditorClassIdentifier: 
+  parentRoom: {fileID: 0}
+  localPosition: {x: 3, y: 2}
+  globalPosition: {x: 0, y: 0}
+  orientation: 1
+  neighbourRoom: {fileID: 0}
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 859b23fae7fc4bd986d3808a902687c5, type: 3}
+  m_Name: Hole
+  m_EditorClassIdentifier: 
+  cols: 4
+  rows: 4
+  northDoor: {fileID: 1399967856634678682}
+  southDoor: {fileID: 2784725257792154678}
+  eastDoor: {fileID: -3859882486338852358}
+  westDoor: {fileID: -4321022531602702549}
+  roomList:
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 6dd99b161001d9b46bec547a2ded0027, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 6dd99b161001d9b46bec547a2ded0027, type: 2}
+  - {fileID: 11400000, guid: ec6ca9ad6a259ff4d82c790f633f4f09, type: 2}
+  - {fileID: 11400000, guid: ec6ca9ad6a259ff4d82c790f633f4f09, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: ec6ca9ad6a259ff4d82c790f633f4f09, type: 2}
+  - {fileID: 11400000, guid: ec6ca9ad6a259ff4d82c790f633f4f09, type: 2}
+  - {fileID: 11400000, guid: 6dd99b161001d9b46bec547a2ded0027, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 6dd99b161001d9b46bec547a2ded0027, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+  - {fileID: 11400000, guid: 85ff71fc4d903264fabb0af79f696b37, type: 2}
+--- !u!114 &1399967856634678682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a875f64b0496ea0ac0360e31405c3, type: 3}
+  m_Name: North Door
+  m_EditorClassIdentifier: 
+  parentRoom: {fileID: 0}
+  localPosition: {x: 2, y: 0}
+  globalPosition: {x: 0, y: 0}
+  orientation: 0
+  neighbourRoom: {fileID: 0}
+--- !u!114 &2784725257792154678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 958a875f64b0496ea0ac0360e31405c3, type: 3}
+  m_Name: South Door
+  m_EditorClassIdentifier: 
+  parentRoom: {fileID: 0}
+  localPosition: {x: 1, y: 3}
+  globalPosition: {x: 0, y: 0}
+  orientation: 3
+  neighbourRoom: {fileID: 0}
